@@ -14,6 +14,10 @@ var i = 0;
 var ii = 0;
 
 // State variables
+var hours = 0;
+var minutes = 0;
+var seconds = 0;
+var finalTime;
 var gameWon = false;
 var gameLost = false;
 const PVP = "pvp";
@@ -70,8 +74,7 @@ var colorSettingDistBetweenCircles;
 var checkGuessTextSize;
 var deleteGuessTextSize;
 var newGameTextSize;
-var gameWonTextSize;
-var gameLostTextSize;
+var gameTimeTextSize = 12;
 var checkGuessWidth;
 var checkGuessHeight;
 var checkGuessX;
@@ -162,8 +165,6 @@ function setDrawingVariables() {
   checkGuessTextSize = autoTextSize("Check Guess", checkGuessWidth);
   deleteGuessTextSize = autoTextSize("Delete Guess", deleteGuessWidth);
   newGameTextSize = autoTextSize("New Game", newGameWidth);
-  gameWonTextSize = autoTextSize("You WON The Game!", gameWonWidth);
-  gameLostTextSize = autoTextSize("You LOST The Game!", gameWonWidth);
 }
 
 function resetBoard() {
@@ -197,6 +198,8 @@ function setup() {
     code[i] = int(random(0, colors.length));
   // Use this color code for debugging pegs
   // code = [4, 4, 5, 4];
+  
+  setInterval(increaseSeconds, 1000);
 
   resetBoard();
   setDrawingVariables();
@@ -257,6 +260,9 @@ function mousePressed() {
     resetBoard();
     boardGuessY = 0;
     boardCircleX = 0;
+    hours = 0;
+    minutes = 0;
+    seconds = 0;
     for (i = 0; i < WIDTH; i++)
       code[i] = int(random(0, colors.length));
   }
@@ -301,11 +307,11 @@ function draw() {
     rect(gameWonX, gameWonY, gameWonWidth, gameWonHeight);
     fill(0);
     if (gameWon) {
-      textSize(gameWonTextSize);
-      text("You WON The Game!", gameWonX + gameWonWidth / 2, gameWonY + gameWonHeight / 2);
+      textSize(gameTimeTextSize);
+      text("You won in " + finalTime + "!", gameWonX + gameWonWidth / 2, gameWonY + gameWonHeight / 2);
     } else if (gameLost) {
-      textSize(gameLostTextSize);
-      text("You LOST The Game!", gameWonX + gameWonWidth / 2, gameWonY + gameWonHeight / 2);
+      textSize(gameTimeTextSize);
+      text("You lost in " + finalTime + "!", gameWonX + gameWonWidth / 2, gameWonY + gameWonHeight / 2);
     }
   }
 
@@ -378,6 +384,29 @@ function draw() {
 
 
 
+function increaseSeconds() {
+  seconds++;
+  if (seconds === 60) {
+    minutes++;
+    if (minutes === 60) {
+      minutes = 0;
+      hours++;
+    }
+    seconds = 0;
+  }
+}
+function printTime() {
+  let s = "";
+  if (hours > 0)
+    s += hours + "hours, ";
+  if (minutes > 0)
+    s += minutes + "minutes, ";
+  if (seconds > 0)
+    s += seconds + " seconds";
+  return s;
+}
+
+
 
 // Guess checker function
 function compareGuess() {
@@ -425,6 +454,14 @@ function checkGameWinStatus() {
       if (boardCheck[boardGuessY][ii] == WHITE_PEG || boardCheck[boardGuessY][ii] == NONE)
         lost = true;
     gameLost = lost;
+  }
+  if (gameWon) {
+    finalTime = printTime();
+    gameTimeTextSize = autoTextSize("You won in " + finalTime + "!", gameWonWidth-gameWonHorizontalPadding*2);
+  }
+  if (gameWon) {
+    finalTime = printTime();
+    gameTimeTextSize = autoTextSize("You lost in " + finalTime + "!", gameWonWidth-gameWonHorizontalPadding*2);
   }
 }
 
@@ -483,17 +520,6 @@ function autoTextSize(txt, rectWidth) {
 
 document.oncontextmenu = function() {
   return false;
-}
-
-function indexElem(arr, elem) {
-  for (ii = 0; ii < arr.length; ii++)
-    if (arr[ii] === elem)
-      return ii;
-  return -1;
-}
-
-function sameColor(c1, c2) {
-  return red(c1) === red(c2) && green(c1) === green(c2) && blue(c1) === blue(c2);
 }
 
 function pprint(name, array) {
